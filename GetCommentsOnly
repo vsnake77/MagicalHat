@@ -1,0 +1,69 @@
+<# 
+
+Disclaimer: This program is only work for powershell script currently. The block comments <# #> cannot be in the same line due to the
+following:  when the program found either <# or #>, it would stop searching and make decision for the entire line base on what it found.
+
+COMMENTS EXTRACTOR -- Comments extractor will only take comments from the scripts. Therefore, you will get the entire comments 
+without codes. It may help people to focus on the logic and bigger picture of the script. It may also decipline and make people better 
+on how to comments. And that may help to become a better coder. 
+
+Author: Liang Cui
+Version 1.0
+
+Created date: 10/1/2016
+Last Update: 10/1/2016
+
+#>
+
+# declear an empty array
+$ReadAllLines = @()
+# Source PATH
+$Source = (($env:HOMEPATH)+"\documents\my test.txt")
+
+# create an arraylist
+$ReadInList = New-Object System.Collections.ArrayList
+
+# read all text and save into an array
+$readalllines += Get-Content $source
+
+# read into arraylist
+# foreach ($eachLine in $ReadAllLines) { $readinlist.add($eachline)}
+
+# comment block indicator, it is false because it hasn't started.
+$CMMSIGNAL = $FALSE
+
+
+# when the first encounter is #, the rest of line will be comments
+
+for ($i=0; $i -lt $readalllines.count; $i++)
+{
+    $PerLine = $readalllines[$i]
+  
+    # Many if statements to determine <#, #>, and # 
+    # --> IF <#, comment block started, $CMMSIGNAL is $TRUE, Add to the ArrayList
+    # --> Else IF #>, comment block ended, $CMMSIGNAL is $FALSE (no adding arrayList).
+    # --> Else IF #, a comment line, no change on $CMMSIGNAL, add to the ArrayList
+    # --> Else, it will depend on the $CMMSIGNAL
+        # IF, the $CMMSIGNAL is $TRUE, Add to the ArrayList
+        # ELSE, (No adding arrayList).
+    if ($perline -match '<#')
+    {
+        $CMMSIGNAL = $TRUE
+        $Readinlist.add($PerLine)
+    }
+    elseif ($perline -match '#>')
+    {
+        $CMMSIGNAL = $FALSE
+        $Readinlist.add($PerLine)
+    }
+    elseif ($perline -match '#')
+    {
+        $Readinlist.add($PerLine)
+    }
+    Else 
+    {
+        if ($CMMSIGNAL -eq $TRUE) {$Readinlist.add($PerLine)}
+    }
+}
+
+$Readinlist | out-file (($env:HOMEPATH)+"\documents\myComments.txt") -force
